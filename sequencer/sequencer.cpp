@@ -2,16 +2,20 @@
 #include <Oscil.h>
 #include <tables/sin2048_int8.h>
 
+#include "sequencer.h"
+
 Oscil<SIN2048_NUM_CELLS, MOZZI_AUDIO_RATE> sine(SIN2048_DATA);
 
 int frequency = 100;
 int tick = 0;
 
-void setup() {
+void setupSequencer() {
   sine.setFreq(frequency);  // Set the starting frequency
   startMozzi();              // Start the Mozzi sound engine
 }
 
+
+// Update frequency  every 6 control updates
 void updateControl() {
   tick++;                    // Count control updates
 
@@ -31,6 +35,6 @@ AudioOutput updateAudio() {
   return MonoOutput::from16Bit((int)sine.next() * 128); // Generate the next audio sample
 }
 
-void loop() {
+void runSequencer() {
   audioHook();               // Keep the audio engine running
 }
