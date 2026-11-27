@@ -6,33 +6,78 @@
 
 Oscil<SIN2048_NUM_CELLS, MOZZI_AUDIO_RATE> sine(SIN2048_DATA);
 
-int frequency = 100;
-int tick = 0;
+// Fixe octave
+const int OCTAVE = 4;
+const int MIDI_BASE = 12 * (OCTAVE + 1);
 
-void setupSequencer() {
-  sine.setFreq(frequency);  // Set the starting frequency
-  startMozzi();              // Start the Mozzi sound engine
+// assign keys: left to right
+const byte keyPins[12] = {
+  33, 32, 31, 30, 29, 28, 
+  27, 26, 25, 24, 23, 22
+};
+
+
+int previousMidiNote = -1;
+bool noteActive = false;
+
+
+// Convert MIDI note to frequency
+float midiToFrequency(int midiNote) {
+  return 440.0f * powf(
+      2.0f,
+      (midiNote -69) / 12.0f
+      );
 }
 
-
-// Update frequency  every 6 control updates
-void updateControl() {
-  tick++;                    // Count control updates
-
-  if (tick >= 6) {           // Wait for 6 control updates
-    tick = 0;                // Reset the counter
-    frequency += 10;         // Increase frequency by 10 Hz
-
-    if (frequency > 1500) {  // Check if frequency exceeds 1500 Hz
-      frequency = 100;       // Reset frequency to 100 Hz
-    }
-
-    sine.setFreq(frequency); // Apply the new frequency
+void setupSequencer() {
+  for(int i = 0; i < 12; i++) {
+    pinMode(keyPins[i], INPUT_PULLUP);
   }
+
+  sine.setFreq(440.0f);
+
+  startMozzi();
+}
+
+void updateControl() {
+  int pressedKey = -1;
+  
+  // Find first pressed key 
+  for(int i = 0; i < 12; i++) {
+    if(digitalRead(keyPins[i]) == LOW) {
+      pressedKey = i;
+      break;
+    }
+  }
+
+  // No key pressed
+  if(pressedKey == -1) {
+    noteActive = false;
+    previousMidiNote = -1;
+    return;
+  }
+
+  // Convert key index to MIDI number
+  int midiNote = MIDI_BASE + pressedKey;
+
+  // Update frequency only when note changes
+  if(midiNote != previousMidiNote) {
+    float frequency = midiToFrequency(midiNote);
+    
+    sine.setFreq(frequency);
+
+    previousMidiNote = midiNote;
+  }
+
+  noteActive = true;
 }
 
 AudioOutput updateAudio() {
-  return MonoOutput::from16Bit((int)sine.next() * 128); // Generate the next audio sample
+  if(!noteActive) {
+    return MonoOutput::from16bit(0);
+  }
+
+  return MonoOutput::from16Bit((int).sine.next() * 128);
 }
 
 void runSequencer() {

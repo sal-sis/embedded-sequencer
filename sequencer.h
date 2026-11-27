@@ -3,11 +3,11 @@
 
 #include <Mozzi.h>
 
+float midiToFrequency(int midiNote);
 void setupSequencer();
-void updateControl();
+void updateControl(); 
 AudioOutput updateAudio(); 
-void runSequencer();
-
+void runSequencer(); 
 
 
 #endif
