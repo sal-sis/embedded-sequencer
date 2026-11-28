@@ -1,4 +1,3 @@
-#include <Mozzi.h>
 #include <Oscil.h>
 #include <tables/sin2048_int8.h>
 
@@ -74,10 +73,10 @@ void updateControl() {
 
 AudioOutput updateAudio() {
   if(!noteActive) {
-    return MonoOutput::from16bit(0);
+    return MonoOutput::from16Bit(0);
   }
 
-  return MonoOutput::from16Bit((int).sine.next() * 128);
+  return MonoOutput::from16Bit((int)sine.next() * 128);
 }
 
 void runSequencer() {
