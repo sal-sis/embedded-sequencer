@@ -1,9 +1,9 @@
 #include <Oscil.h>
-#include <tables/sin2048_int8.h>
+#include <tables/square_no_alias_2048_int8.h>
 
 #include "sequencer.h"
 
-Oscil<SIN2048_NUM_CELLS, MOZZI_AUDIO_RATE> sine(SIN2048_DATA);
+Oscil<SQUARE_NO_ALIAS_2048_NUM_CELLS, MOZZI_AUDIO_RATE> squareOsc(SQUARE_NO_ALIAS_2048_DATA);
 
 // Fixe octave
 const int OCTAVE = 4;
@@ -33,7 +33,7 @@ void setupSequencer() {
     pinMode(keyPins[i], INPUT_PULLUP);
   }
 
-  sine.setFreq(440.0f);
+  squareOsc.setFreq(440.0f);
 
   startMozzi();
 }
@@ -63,7 +63,7 @@ void updateControl() {
   if(midiNote != previousMidiNote) {
     float frequency = midiToFrequency(midiNote);
     
-    sine.setFreq(frequency);
+    squareOsc.setFreq(frequency);
 
     previousMidiNote = midiNote;
   }
@@ -76,7 +76,7 @@ AudioOutput updateAudio() {
     return MonoOutput::from16Bit(0);
   }
 
-  return MonoOutput::from16Bit((int)sine.next() * 128);
+  return MonoOutput::from16Bit((int)squareOsc.next() * 128);
 }
 
 void runSequencer() {
